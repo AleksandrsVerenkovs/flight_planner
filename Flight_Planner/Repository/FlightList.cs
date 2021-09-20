@@ -43,22 +43,22 @@ namespace Flight_Planner.Repository
 
         public static bool IsValid(Flight flight)
         {
-            var result = true;
+            //var result = true;
             if (flight.From == null)
-                result =  false;
+                return false;
             if (flight.To == null)
-                result =  false;
+                return false;
             if (string.IsNullOrEmpty(flight.To.City) || string.IsNullOrEmpty(flight.To.Country) || string.IsNullOrEmpty(flight.To.AirportCode))
-                result =  false;
+                return false;
             if (string.IsNullOrEmpty(flight.From.City) || string.IsNullOrEmpty(flight.From.Country) || string.IsNullOrEmpty(flight.From.AirportCode))
-                result =  false;
+                return false;
             if (string.IsNullOrEmpty(flight.Carrier) || string.IsNullOrEmpty(flight.DepartureTime) || string.IsNullOrEmpty(flight.ArrivalTime))
-                result =  false;
+                return false;
             if (flight.To.AirportCode.Trim().ToLower() == flight.From.AirportCode.Trim().ToLower())
-                result =  false;
+                return false;
             if (DateTime.Parse(flight.ArrivalTime) <= DateTime.Parse(flight.DepartureTime))
-                result =  false;
-            return result;
+                return false;
+            return true;
         }
 
         
