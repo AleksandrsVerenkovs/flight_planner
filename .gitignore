@@ -884,7 +884,6 @@ FodyWeavers.xsd
 *.msp
 
 # JetBrains Rider
-
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
