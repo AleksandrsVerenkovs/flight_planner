@@ -25,10 +25,10 @@ namespace Flight_Planner.Repository
 
         public static Flight AddFlight(Flight flight)
         {
-                flight.Id = _count;
-                _count++;
-                _flights.Add(flight);
-                return flight;
+            flight.Id = _count;
+            _count++;
+            _flights.Add(flight);
+            return flight;
         }
 
         public static bool Exists(Flight flight)
@@ -43,7 +43,6 @@ namespace Flight_Planner.Repository
 
         public static bool IsValid(Flight flight)
         {
-            
             if (flight.From == null)
                 return false;
             if (flight.To == null)
@@ -60,24 +59,21 @@ namespace Flight_Planner.Repository
                 return false;
             return true;
         }
-
         
         public static bool IsValidFlight(FlightSearch flight)
         {
             var result = true;
             if (string.IsNullOrEmpty(flight.From) || string.IsNullOrEmpty(flight.To) || string.IsNullOrEmpty(flight.DepartureDate))
-                {
-                    result = false;
-                }
+            {
+                result = false;
+            }
             
             return result;
         }
 
         public static bool IsSameAirport(FlightSearch flight)
         {
-            if (flight.From == flight.To)
-                return false;
-            return true;
+            return flight.From == flight.To ? false : true;
         }
 
         public static PageResult SearchResult(FlightSearch searchItem)
@@ -96,12 +92,11 @@ namespace Flight_Planner.Repository
 
             return result;
         }
-        
 
         public static void DeleteFlight(int id)
         {
-                var item = _flights.SingleOrDefault(f => f.Id == id);
-                _flights.Remove(item);
+            var item = _flights.SingleOrDefault(f => f.Id == id);
+            _flights.Remove(item);
         }
 
         public static Airport[] GetByTag(string search)
