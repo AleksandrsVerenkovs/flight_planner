@@ -12,6 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Flight_Planner.Helpers;
+using Flight_Planner.DbContext;
+using Microsoft.EntityFrameworkCore;
+using Flight_Planner.Repository;
 
 namespace Flight_Planner
 {
@@ -27,14 +30,18 @@ namespace Flight_Planner
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, AuthenticateHandler>("BasicAuthentication", null);
+            services.AddDbContext<FlightPlannerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("flight-planner")));
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flight_Planner", Version = "v1" });
             });
+
+            services.AddScoped<FlightList,FlightList>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

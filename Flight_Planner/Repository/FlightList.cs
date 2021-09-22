@@ -3,37 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Flight_Planner.DbContext;
 using Flight_Planner.Models;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flight_Planner.Repository
 {
-    public static class FlightList
+    public class FlightList
     {
-        private static List<Flight> _flights = new List<Flight>();
-        private static int _count = 1;
+        private readonly FlightPlannerDbContext _context = null;
 
-        public static Flight GetById(int id)
+        public FlightList(FlightPlannerDbContext context)
         {
-            return _flights.SingleOrDefault(flight => flight.Id == id);
+            _context = context;
         }
 
-        public static void ClearFlight()
+        public Flight GetById(int id)
         {
-            _flights.Clear();
+            return _context.Flights
+                .Include(f => f.To)
+                .Include(f => f.From)
+                .SingleOrDefault(flight => flight.Id == id);
         }
 
-        public static Flight AddFlight(Flight flight)
+        public void ClearFlight()
         {
-            flight.Id = _count;
-            _count++;
-            _flights.Add(flight);
+            _context.Flights.RemoveRange(_context.Flights);
+            _context.Airports.RemoveRange(_context.Airports);
+            _context.SaveChanges();
+        }
+
+        public Flight AddFlight(Flight flight)
+        {
+            _context.Flights.Add(flight);
+            _context.SaveChanges();
             return flight;
         }
 
-        public static bool Exists(Flight flight)
+        public bool Exists(Flight flight)
         {
-            return _flights.Any(f =>
+            return _context.Flights.Any(f =>
             f.From.AirportCode == flight.From.AirportCode &&
             f.To.AirportCode == flight.To.AirportCode &&
             f.Carrier == flight.Carrier &&
@@ -41,7 +51,7 @@ namespace Flight_Planner.Repository
             f.ArrivalTime == flight.ArrivalTime);
         }
 
-        public static bool IsValid(Flight flight)
+        public bool IsValid(Flight flight)
         {
             if (flight.From == null)
                 return false;
@@ -60,7 +70,7 @@ namespace Flight_Planner.Repository
             return true;
         }
         
-        public static bool IsValidFlight(FlightSearch flight)
+        public bool IsValidFlight(FlightSearch flight)
         {
             var result = true;
             if (string.IsNullOrEmpty(flight.From) || string.IsNullOrEmpty(flight.To) || string.IsNullOrEmpty(flight.DepartureDate))
@@ -71,39 +81,45 @@ namespace Flight_Planner.Repository
             return result;
         }
 
-        public static bool IsSameAirport(FlightSearch flight)
+        public bool IsSameAirport(FlightSearch flight)
         {
-            return flight.From == flight.To ? false : true;
+            return flight.From != flight.To;
         }
 
-        public static PageResult SearchResult(FlightSearch searchItem)
+        public PageResult SearchResult(FlightSearch searchItem)
         {
-            var fliteredFlights = _flights.Where(flight =>
+            var filteredFlights = _context.Flights.Include(f => f.To).Include(f => f.From).Where(flight =>
                 flight.From.AirportCode.Trim().ToLower() == searchItem.From.Trim().ToLower() &&
                 flight.To.AirportCode.Trim().ToLower() == searchItem.To.Trim().ToLower() &&
                 flight.DepartureTime.Substring(0,10) == searchItem.DepartureDate).ToList();
 
             var result = new PageResult()
             {
-                Page = fliteredFlights.Count > 1 ? 1 : 0,
-                TotalItems = fliteredFlights.Count,
-                Items = new List<Flight>(fliteredFlights)
+                Page = filteredFlights.Count > 1 ? 1 : 0,
+                TotalItems = filteredFlights.Count,
+                Items = new List<Flight>(filteredFlights)
             };
 
             return result;
         }
 
-        public static void DeleteFlight(int id)
+        public void DeleteFlight(int id)
         {
-            var item = _flights.SingleOrDefault(f => f.Id == id);
-            _flights.Remove(item);
+            var item = _context.Flights.Include(f => f.To).Include(f => f.From).SingleOrDefault(f => f.Id == id);
+            if(item != null)
+            {
+                _context.Airports.Remove(item.To);
+                _context.Airports.Remove(item.From);
+                _context.Flights.Remove(item);
+                _context.SaveChanges();
+            }
         }
 
-        public static Airport[] GetByTag(string search)
+        public Airport[] GetByTag(string search)
         {
             var str = search.Trim().ToLower();
-            var airport = _flights.SingleOrDefault(f => f.From.AirportCode.ToLower().Contains(str) || f.From.City.ToLower().Contains(str) || f.From.Country.ToLower().Contains(str)).From;
-            return new[] { airport };
+            var airport = _context.Airports.SingleOrDefault(f => f.AirportCode.ToLower().Contains(str) || f.City.ToLower().Contains(str) || f.Country.ToLower().Contains(str));
+            return new []{ airport};
         }
 
     }

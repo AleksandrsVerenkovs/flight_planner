@@ -13,31 +13,35 @@ namespace Flight_Planner.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
+        private readonly FlightList _flightList = null;
+        public CustomerController(FlightList flightList)
+        {
+            _flightList = flightList;
+        }
         [HttpGet]
         [Route("airports")]
-
         public IActionResult GetByTag(string search)
         {
-            return Ok(FlightList.GetByTag(search));
+            return Ok(_flightList.GetByTag(search));
         }
 
         [HttpPost]
         [Route("flights/search")]
         public IActionResult SearchFlights(FlightSearch search)
         {
-            if (!FlightList.IsValidFlight(search))
+            if (!_flightList.IsValidFlight(search))
                 return BadRequest();
-            if (!FlightList.IsSameAirport(search))
+            if (!_flightList.IsSameAirport(search))
                 return BadRequest();
 
-            var response = FlightList.SearchResult(search);
+            var response = _flightList.SearchResult(search);
             return Ok(response);
         }
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
-            var flightId = FlightList.GetById(id);
+            var flightId = _flightList.GetById(id);
             if (flightId == null)
             {
                 return NotFound();

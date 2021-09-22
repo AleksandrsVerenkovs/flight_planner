@@ -12,11 +12,16 @@ namespace Flight_Planner.Controllers
     [ApiController]
     public class TestingController : ControllerBase
     {
+        private readonly FlightList _flightList = null;
+        public TestingController(FlightList flightList)
+        {
+            _flightList = flightList;
+        }
         [HttpPost]
         [Route("clear")]
         public IActionResult PostResult()
         {
-            FlightList.ClearFlight();
+            _flightList.ClearFlight();
             return Ok();
 
         }

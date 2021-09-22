@@ -15,12 +15,18 @@ namespace Flight_Planner.Controllers
     [Route("admin-api")]
     public class AdminController : ControllerBase
     {
+        private readonly FlightList _flightList = null;
+        public AdminController(FlightList flightList)
+        {
+            _flightList = flightList;
+        }
+
         private static object _lock = new object(); 
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
-            var flightId = FlightList.GetById(id);
+            var flightId = _flightList.GetById(id);
             if (flightId == null)
             {
                 return NotFound();
@@ -35,15 +41,16 @@ namespace Flight_Planner.Controllers
         {
             lock (_lock)
             {
-                if (FlightList.Exists(flight))
-                {
-                    return Conflict();
-                }
-                if (!FlightList.IsValid(flight))
+                if (!_flightList.IsValid(flight))
                 {
                     return BadRequest();
                 }
-                FlightList.AddFlight(flight);
+                if (_flightList.Exists(flight))
+                {
+                    return Conflict();
+                }
+                
+                _flightList.AddFlight(flight);
                 return Created("", flight);
             }
         }
@@ -54,7 +61,7 @@ namespace Flight_Planner.Controllers
         {
             lock (_lock)
             {
-                FlightList.DeleteFlight(id);
+                _flightList.DeleteFlight(id);
                 return Ok();
             }
         }
