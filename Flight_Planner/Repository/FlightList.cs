@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Flight_Planner.DbContext;
 using Flight_Planner.Models;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flight_Planner.Repository
