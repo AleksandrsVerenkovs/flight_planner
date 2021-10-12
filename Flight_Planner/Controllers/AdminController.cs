@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Flight_Planner.Models;
-using Flight_Planner.Repository;
 using Microsoft.AspNetCore.Authorization;
+using FlightPlanner.Core.Models;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Core.Dto;
+using AutoMapper;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Flight_Planner.Controllers
 {
@@ -10,43 +14,49 @@ namespace Flight_Planner.Controllers
     [Route("admin-api")]
     public class AdminController : ControllerBase
     {
-        private readonly FlightList _flightList = null;
-        public AdminController(FlightList flightList)
+        private readonly IFlightService _flightService;
+        private readonly IMapper _mapper;
+        private readonly IEnumerable<IValidator> _validators;
+        private static object _lock = new object();
+
+        public AdminController(IFlightService flightService, IMapper mapper, IEnumerable<IValidator> validators)
         {
-            _flightList = flightList;
+            _flightService = flightService;
+            _mapper = mapper;
+            _validators = validators;
         }
 
-        private static object _lock = new object(); 
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
-            var flightId = _flightList.GetById(id);
+            var flightId = _flightService.GetFlightById(id);
             if (flightId == null)
             {
                 return NotFound();
             }
 
-            return Ok(flightId);
+            return Ok(_mapper.Map<FlightResponse>(flightId));
         }
 
         [HttpPut]
         [Route("flights")]
-        public IActionResult PutFlight(Flight flight)
+        public IActionResult PutFlight(FlightRequest request)
         {
             lock (_lock)
             {
-                if (!_flightList.IsValid(flight))
+                var flight = _mapper.Map<Flight>(request);
+
+                if (!_validators.All(s => s.IsValid(request)))
                 {
                     return BadRequest();
                 }
-                if (_flightList.Exists(flight))
+                if (_flightService.Exists(flight))
                 {
                     return Conflict();
                 }
-                
-                _flightList.AddFlight(flight);
-                return Created("", flight);
+                _flightService.Create(flight);
+                return Created("", _mapper.Map<FlightResponse>(flight));
             }
         }
 
@@ -56,7 +66,15 @@ namespace Flight_Planner.Controllers
         {
             lock (_lock)
             {
-                _flightList.DeleteFlight(id);
+                var flight = _flightService.GetFlightById(id);
+                try
+                {
+                    _flightService.Delete(flight);
+                }
+                catch
+                {
+                    return Ok();
+                }
                 return Ok();
             }
         }

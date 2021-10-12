@@ -1,20 +1,20 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Flight_Planner.Helpers;
-using Flight_Planner.DbContext;
 using Microsoft.EntityFrameworkCore;
-using Flight_Planner.Repository;
+using FlightPlanner.Data;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Services;
+using FlightPlanner.Core.Models;
+using Flight_Planner.Mapping;
+using AutoMapper;
+using FlightPlanner.Services.Validation;
+using FlightPlanner.Services.Validation.FlightSearch;
 
 namespace Flight_Planner
 {
@@ -41,7 +41,29 @@ namespace Flight_Planner
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flight_Planner", Version = "v1" });
             });
 
-            services.AddScoped<FlightList,FlightList>();
+            services.AddScoped<IFlightPlannerDbContext, FlightPlannerDbContext>();
+            services.AddScoped<IDbService,DbService>();
+            services.AddScoped<IEntityService<Flight>, EntityService<Flight>>();
+            services.AddScoped<IEntityService<Airport>, EntityService<Airport>>();
+            services.AddScoped<IDbServiceExtended, DbServiceExtended>();
+            services.AddScoped<IFlightService, FlightService>();
+            services.AddScoped<IValidator, CityValidator>();
+            services.AddScoped<IValidator, AirportCodeValidator>();
+            services.AddScoped<IValidator, ArrivalTimeValidator>();
+            services.AddScoped<IValidator, CarrierValidator>();
+            services.AddScoped<IValidator, CountryValidator>();
+            services.AddScoped<IValidator, DepartureTimeValidator>();
+            services.AddScoped<IValidator, TravelTimeValidator>();
+            services.AddScoped<IFlightSearchService, FlightSearchService>();
+            services.AddScoped<IValidator, AirportConnectValidator>();
+            services.AddScoped<IPageResultService, PageResultService>();
+            services.AddScoped<ISearchValidator, SearchAirportValidator>();
+
+
+            var cfg = AutoMapperConfiguration.GetConfig();
+            services.AddSingleton(typeof(IMapper),cfg);
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
