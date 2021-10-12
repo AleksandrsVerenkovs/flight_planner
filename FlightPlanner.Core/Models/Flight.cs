@@ -1,5 +1,4 @@
-﻿
-namespace FlightPlanner.Core.Models
+﻿namespace FlightPlanner.Core.Models
 {
     public class Flight : Entity
     {

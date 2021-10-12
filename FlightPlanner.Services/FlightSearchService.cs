@@ -1,5 +1,4 @@
-﻿using FlightPlanner.Core.Dto;
-using FlightPlanner.Core.Models;
+﻿using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
 using FlightPlanner.Data;
 using System.Linq;
@@ -11,7 +10,6 @@ namespace FlightPlanner.Services
         public FlightSearchService(IFlightPlannerDbContext context) : base(context)
         {
         }
-
         public Airport GetByTag(string tag)
         {
             var str = tag.Trim().ToLower();

@@ -1,5 +1,4 @@
-﻿
-using FlightPlanner.Core.Services;
+﻿using FlightPlanner.Core.Services;
 
 namespace FlightPlanner.Services.Validation.FlightSearch
 {

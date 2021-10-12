@@ -12,7 +12,5 @@ namespace FlightPlanner.Data
         EntityEntry<T> Entry<T>(T entity) where T : class;
 
         int SaveChanges();
-
-
     }
 }
