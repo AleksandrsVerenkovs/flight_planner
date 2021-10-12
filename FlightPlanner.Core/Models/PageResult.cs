@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using FlightPlanner.Core.Dto;
+using System.Collections.Generic;
 
-namespace Flight_Planner.Models
+namespace FlightPlanner.Core.Models
 {
     public class PageResult
     {
         public int Page { get; set; }
         public int TotalItems { get; set; }
         public List<Flight> Items { get; set; }
-
     }
 }
